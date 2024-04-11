@@ -2,6 +2,8 @@ import createShip from './ship';
 
 const gameboard = () => {
   const shipsArray = [];
+  const missedArray = [];
+  const hitArray = [];
   let vertical = false;
 
   const setVertical = () => (vertical = true);
@@ -51,6 +53,9 @@ const gameboard = () => {
     );
   };
 
+  const isHit = (row, col) =>
+    hitArray.some((coord) => coord[0] === row && coord[1] === col);
+
   const generateShipCoordinates = (length, coordinates) => {
     let row = coordinates[0];
     let col = coordinates[1];
@@ -79,12 +84,67 @@ const gameboard = () => {
     if (isBeyondBoard(coordinates))
       throw new Error('Coordinates beyond the board');
     const coordinatesArray = generateShipCoordinates(length, coordinates);
-    const shipInstance = createShip(5, coordinatesArray);
+    const shipInstance = createShip(length, coordinatesArray);
     shipsArray.push(shipInstance);
-    return shipInstance;
   };
 
-  return { placeShip, setVertical, setHorizontal };
+  const receiveAttack = ([row, col]) => {
+    if (isHit(row, col))
+      throw new Error('You cannot attack the same place twice');
+    const target = shipsArray.filter((ship) =>
+      ship.coordinates.some((coord) => coord[0] === row && coord[1] === col),
+    );
+    if (target.length > 0) {
+      target[0].hit();
+      target[0].isSunk();
+      hitArray.push([row, col]);
+    } else missedArray.push([row, col]);
+  };
+
+  const autoPlaceShips = () => {
+    const shipLengths = [5, 4, 3, 3, 2];
+
+    shipLengths.forEach((length) => {
+      let isValidPlacement = false;
+
+      while (!isValidPlacement) {
+        if (Math.random() < 0.5) {
+          setVertical();
+        } else {
+          setHorizontal();
+        }
+
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
+        const coordinates = [row, col];
+
+        try {
+          placeShip(length, coordinates);
+          isValidPlacement = true;
+        } catch (error) {}
+      }
+    });
+  };
+
+  const areAllShipsSunk = () => shipsArray.every((ship) => ship.sunk);
+
+  const getShipsArray = () => shipsArray;
+
+  const getmissedArray = () => missedArray;
+
+  const getHitArray = () => hitArray;
+
+  return {
+    placeShip,
+    setVertical,
+    setHorizontal,
+    getShipsArray,
+    getmissedArray,
+    getHitArray,
+    receiveAttack,
+    areAllShipsSunk,
+    autoPlaceShips,
+  };
 };
 
 export default gameboard;
