@@ -27,3 +27,31 @@ header {
 .test {
   color: red;
 }
+
+.game-section {
+  width: 100%;
+  max-width: 1280px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.gameboard-container {
+  width: 100%;
+  max-width: 640px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.board-cell {
+  border: 1px solid;
+  width: clamp(1rem, 0.2rem + 3vw, 3rem);
+  height: clamp(1rem, 0.2rem + 3vw, 3rem);
+}
+
+.ship {
+  background-color: #585858;
+}
+
+.hit {
+  background-color: #ff2b2b;
+}

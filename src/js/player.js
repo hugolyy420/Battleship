@@ -1,4 +1,4 @@
-const player = (name, gameboard) => {
+const createPlayer = (gameboard, name = 'computer') => {
   const generateRandomCoord = () => {
     const gridSize = 10;
     const allCoordinates = [];
@@ -23,4 +23,4 @@ const player = (name, gameboard) => {
   return { name, gameboard, generateRandomCoord };
 };
 
-export default player;
+export default createPlayer;

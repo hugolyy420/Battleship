@@ -27,5 +27,6 @@ module.exports = {
   },
   rules: {
     quotes: ['error', 'single'],
+    no-shadow: ["error", { "hoist": "functions" }]
   },
 };

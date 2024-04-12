@@ -83,6 +83,11 @@ const gameboard = () => {
   const placeShip = (length, coordinates) => {
     if (isBeyondBoard(coordinates))
       throw new Error('Coordinates beyond the board');
+    if (isOccupied(coordinates)) throw new Error('Coordinates occupied');
+    if (isNextToShips(coordinates))
+      throw new Error(
+        'Please ensure ships are at least 1 unit away from one another',
+      );
     const coordinatesArray = generateShipCoordinates(length, coordinates);
     const shipInstance = createShip(length, coordinatesArray);
     shipsArray.push(shipInstance);
@@ -121,7 +126,9 @@ const gameboard = () => {
         try {
           placeShip(length, coordinates);
           isValidPlacement = true;
-        } catch (error) {}
+        } catch (error) {
+          console.log(error);
+        }
       }
     });
   };
