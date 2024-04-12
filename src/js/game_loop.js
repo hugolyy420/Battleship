@@ -17,7 +17,11 @@ const gameLoop = (() => {
     });
   }
 
-  return { player, computer, createPlayers, autoPlaceShips };
+  function playerAttack(coord) {
+    this.computer.gameboard.receiveAttack(coord);
+  }
+
+  return { player, computer, createPlayers, autoPlaceShips, playerAttack };
 })();
 
 export default gameLoop;

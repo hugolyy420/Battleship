@@ -94,8 +94,7 @@ const gameboard = () => {
   };
 
   const receiveAttack = ([row, col]) => {
-    if (isHit(row, col))
-      throw new Error('You cannot attack the same place twice');
+    if (isHit(row, col)) return;
     const target = shipsArray.filter((ship) =>
       ship.coordinates.some((coord) => coord[0] === row && coord[1] === col),
     );
@@ -151,6 +150,7 @@ const gameboard = () => {
     receiveAttack,
     areAllShipsSunk,
     autoPlaceShips,
+    isHit,
   };
 };
 

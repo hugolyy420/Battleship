@@ -55,3 +55,7 @@ header {
 .hit {
   background-color: #ff2b2b;
 }
+
+.missed {
+  background-color: #b1b1b1;
+}

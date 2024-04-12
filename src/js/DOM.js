@@ -19,7 +19,7 @@ const DOMModule = (() => {
     });
   };
 
-  const renderShip = () => {
+  const renderShips = () => {
     const shipsArray = gameLoop.player.gameboard.getShipsArray();
     shipsArray.forEach((ships) => {
       ships.coordinates.forEach((coord) => {
@@ -33,7 +33,7 @@ const DOMModule = (() => {
 
   const populateGameboard = () => {
     gameLoop.autoPlaceShips();
-    renderShip();
+    renderShips();
   };
 
   const setUpAttackEventListener = () => {
@@ -42,7 +42,13 @@ const DOMModule = (() => {
     );
     computerGameboardContainer.addEventListener('click', (event) => {
       if (event.target.closest('.board-cell')) {
-        event.target.classList.add('hit');
+        const xCoord = parseInt(event.target.dataset.x);
+        const yCoord = parseInt(event.target.dataset.y);
+        const attackCoord = [xCoord, parseInt(yCoord)];
+        gameLoop.playerAttack(attackCoord);
+        if (gameLoop.computer.gameboard.isHit(xCoord, yCoord))
+          event.target.classList.add('hit');
+        else event.target.classList.add('missed');
       }
     });
   };
