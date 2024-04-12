@@ -3,6 +3,7 @@ import gameLoop from './game_loop';
 
 const DOMModule = (() => {
   const gameboardContainers = document.querySelectorAll('.gameboard-container');
+  const messageDisplay = document.querySelector('.message-display');
 
   const createGrids = () => {
     const gridSize = 10;
@@ -20,7 +21,7 @@ const DOMModule = (() => {
   };
 
   const renderShips = () => {
-    const shipsArray = gameLoop.player.gameboard.getShipsArray();
+    const shipsArray = gameLoop.getPlayerGameboard().getShipsArray();
     shipsArray.forEach((ships) => {
       ships.coordinates.forEach((coord) => {
         const boardCell = document.querySelector(
@@ -36,25 +37,59 @@ const DOMModule = (() => {
     renderShips();
   };
 
+  const updateComputerGameboard = (target, [xCoord, yCoord]) => {
+    const computerGameboard = gameLoop.getComputerGameboard();
+    if (computerGameboard.isHit(xCoord, yCoord)) target.classList.add('hit');
+    else target.classList.add('missed');
+  };
+
+  const updatePlayerGameboard = ([xCoord, yCoord]) => {
+    const playerGameboard = gameLoop.getPlayerGameboard();
+    const target = document.querySelector(
+      `.player-gameboard > [data-x='${xCoord}'][data-y='${yCoord}']`,
+    );
+    if (playerGameboard.isHit(xCoord, yCoord)) target.classList.add('hit');
+    else target.classList.add('missed');
+  };
+
   const setUpAttackEventListener = () => {
     const computerGameboardContainer = document.querySelector(
       '.computer-gameboard',
     );
     computerGameboardContainer.addEventListener('click', (event) => {
-      if (event.target.closest('.board-cell')) {
-        const xCoord = parseInt(event.target.dataset.x);
-        const yCoord = parseInt(event.target.dataset.y);
-        const attackCoord = [xCoord, parseInt(yCoord)];
-        gameLoop.playerAttack(attackCoord);
-        if (gameLoop.computer.gameboard.isHit(xCoord, yCoord))
-          event.target.classList.add('hit');
-        else event.target.classList.add('missed');
+      const target = event.target;
+      if (
+        target.classList.contains('missed') ||
+        target.classList.contains('hit')
+      )
+        return;
+      if (target.closest('.board-cell')) {
+        const xCoord = parseInt(target.dataset.x);
+        const yCoord = parseInt(target.dataset.y);
+        const attackCoord = [xCoord, yCoord];
+        gameLoop.playRound(attackCoord);
+        updateComputerGameboard(target, attackCoord);
+        if (gameLoop.checkPlayerWin()) {
+          messageDisplay.textContent = 'Player wins';
+          return;
+        }
+        const computerAttackCoord = gameLoop
+          .getComputer()
+          .generateRandomCoord();
+        gameLoop.playRound(computerAttackCoord);
+        updatePlayerGameboard(computerAttackCoord);
+        if (gameLoop.checkComputerWin()) {
+          messageDisplay.textContent = 'Computer wins';
+          return;
+        }
       }
     });
   };
 
   return { createGrids, populateGameboard, setUpAttackEventListener };
 })();
+
+export default DOMModule;
 
 DOMModule.createGrids();
 gameLoop.createPlayers();

@@ -56,6 +56,9 @@ const gameboard = () => {
   const isHit = (row, col) =>
     hitArray.some((coord) => coord[0] === row && coord[1] === col);
 
+  const isMissed = (row, col) =>
+    missedArray.some((coord) => coord[0] === row && coord[1] === col);
+
   const generateShipCoordinates = (length, coordinates) => {
     let row = coordinates[0];
     let col = coordinates[1];
@@ -140,6 +143,12 @@ const gameboard = () => {
 
   const getHitArray = () => hitArray;
 
+  const getShip = (row, col) => {
+    return shipsArray.filter((ship) =>
+      ship.coordinates.some((coord) => coord[0] === row && coord[1] === col),
+    );
+  };
+
   return {
     placeShip,
     setVertical,
@@ -151,6 +160,8 @@ const gameboard = () => {
     areAllShipsSunk,
     autoPlaceShips,
     isHit,
+    isMissed,
+    getShip,
   };
 };
 
