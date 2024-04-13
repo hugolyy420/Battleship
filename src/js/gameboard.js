@@ -84,7 +84,7 @@ const gameboard = () => {
 
     for (let i = 0; i < length - 1; i += 1) {
       let newCoordinates;
-      if (vertical) newCoordinates = [(row -= 1), col];
+      if (vertical) newCoordinates = [(row += 1), col];
       else newCoordinates = [row, (col += 1)];
       if (isBeyondBoard(newCoordinates))
         throw new Error('New coordinates beyond the board');
@@ -105,7 +105,7 @@ const gameboard = () => {
       throw new Error(
         'Please ensure ships are at least 1 unit away from one another',
       );
-    const shipInstance = createShip(length, coordinatesArray);
+    const shipInstance = createShip(length, coordinatesArray, coordinates);
     shipsArray.push(shipInstance);
   };
 
@@ -144,6 +144,7 @@ const gameboard = () => {
         try {
           placeShip(length, coordinates);
           isValidPlacement = true;
+          console.log(shipsArray);
         } catch (error) {
           console.log(error);
         }

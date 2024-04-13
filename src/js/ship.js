@@ -1,6 +1,7 @@
-const createShip = (length, coordinates) => ({
+const createShip = (length, coordinates, start) => ({
   length,
   coordinates,
+  start,
   hitNumber: 0,
   sunk: false,
   hit() {

@@ -64,7 +64,7 @@ export const createComputer = (gameboard, name = 'computer') => {
     let triedAllDirections = false; // Track if all directions have been tried
 
     while (!validAttack && !triedAllDirections) {
-      let nextTarget = [...target];
+      const nextTarget = [...target];
       switch (direction) {
         case 'up':
           nextTarget[0] -= 1;
@@ -94,7 +94,7 @@ export const createComputer = (gameboard, name = 'computer') => {
         if (triedAllDirections) {
           return null;
         }
-        nextTarget = target === lastHit ? firstHit : lastHit; // Switch between firstHit and lastHit
+        target = target === lastHit ? firstHit : lastHit; // Switch between firstHit and lastHit
       } else {
         validAttack = true;
         return nextTarget;

@@ -22,13 +22,22 @@ const DOMModule = (() => {
 
   const renderShips = () => {
     const shipsArray = gameLoop.getPlayerGameboard().getShipsArray();
-    shipsArray.forEach((ships) => {
-      ships.coordinates.forEach((coord) => {
-        const boardCell = document.querySelector(
-          `[data-row='${coord[0]}'][data-col='${coord[1]}']`,
-        );
-        boardCell.classList.add('ship');
-      });
+    shipsArray.forEach((ship) => {
+      const shipInstance = document.createElement('div');
+      const size = 'clamp(1rem, 0.2rem + 3vw, 3rem)';
+      if (ship.coordinates[0][0] === ship.coordinates[1][0]) {
+        shipInstance.style.width = `calc(${ship.length} * ${size})`;
+        shipInstance.style.height = size;
+      } else {
+        shipInstance.style.width = size;
+        shipInstance.style.height = `calc(${ship.length} * ${size})`;
+      }
+      shipInstance.classList.add('ship');
+
+      const boardCell = document.querySelector(
+        `[data-row='${ship.start[0]}'][data-col='${ship.start[1]}']`,
+      );
+      boardCell.append(shipInstance);
     });
   };
 
