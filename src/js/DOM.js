@@ -12,8 +12,8 @@ const DOMModule = (() => {
         for (let j = 0; j < gridSize; j += 1) {
           const cell = document.createElement('div');
           cell.classList.add('board-cell');
-          cell.dataset.x = i;
-          cell.dataset.y = j;
+          cell.dataset.row = i;
+          cell.dataset.col = j;
           container.append(cell);
         }
       }
@@ -25,7 +25,7 @@ const DOMModule = (() => {
     shipsArray.forEach((ships) => {
       ships.coordinates.forEach((coord) => {
         const boardCell = document.querySelector(
-          `[data-x='${coord[0]}'][data-y='${coord[1]}']`,
+          `[data-row='${coord[0]}'][data-col='${coord[1]}']`,
         );
         boardCell.classList.add('ship');
       });
@@ -37,19 +37,46 @@ const DOMModule = (() => {
     renderShips();
   };
 
-  const updateComputerGameboard = (target, [xCoord, yCoord]) => {
+  const updateComputerGameboard = () => {
     const computerGameboard = gameLoop.getComputerGameboard();
-    if (computerGameboard.isHit(xCoord, yCoord)) target.classList.add('hit');
-    else target.classList.add('missed');
+    const hitArray = computerGameboard.getHitArray();
+    const missArray = computerGameboard.getMissedArray();
+    console.log(missArray);
+    hitArray.forEach((coord) => {
+      const targetCell = document.querySelector(
+        `.computer-gameboard > [data-row='${coord[0]}'][data-col='${coord[1]}']`,
+      );
+      targetCell.classList.add('hit');
+    });
+    missArray.forEach((coord) => {
+      const targetCell = document.querySelector(
+        `.computer-gameboard > [data-row='${coord[0]}'][data-col='${coord[1]}']`,
+      );
+      targetCell.classList.add('missed');
+    });
   };
 
-  const updatePlayerGameboard = ([xCoord, yCoord]) => {
+  const updatePlayerGameboard = () => {
     const playerGameboard = gameLoop.getPlayerGameboard();
-    const target = document.querySelector(
-      `.player-gameboard > [data-x='${xCoord}'][data-y='${yCoord}']`,
-    );
-    if (playerGameboard.isHit(xCoord, yCoord)) target.classList.add('hit');
-    else target.classList.add('missed');
+    const hitArray = playerGameboard.getHitArray();
+    const missArray = playerGameboard.getMissedArray();
+    hitArray.forEach((coord) => {
+      const targetCell = document.querySelector(
+        `.player-gameboard > [data-row='${coord[0]}'][data-col='${coord[1]}']`,
+      );
+      targetCell.classList.add('hit');
+    });
+    missArray.forEach((coord) => {
+      const targetCell = document.querySelector(
+        `.player-gameboard > [data-row='${coord[0]}'][data-col='${coord[1]}']`,
+      );
+      targetCell.classList.add('missed');
+    });
+  };
+
+  const printMessage = (player) => {
+    if (player.name === 'player') messageDisplay.textContent = 'Player wins';
+    else messageDisplay.textContent = 'Computer wins';
   };
 
   const setUpAttackEventListener = () => {
@@ -57,36 +84,31 @@ const DOMModule = (() => {
       '.computer-gameboard',
     );
     computerGameboardContainer.addEventListener('click', (event) => {
-      const target = event.target;
+      const { target } = event;
+
       if (
         target.classList.contains('missed') ||
         target.classList.contains('hit')
       )
         return;
+
       if (target.closest('.board-cell')) {
-        const xCoord = parseInt(target.dataset.x);
-        const yCoord = parseInt(target.dataset.y);
-        const attackCoord = [xCoord, yCoord];
+        const row = parseInt(target.dataset.row, 10);
+        const col = parseInt(target.dataset.col, 10);
+        const attackCoord = [row, col];
         gameLoop.playRound(attackCoord);
-        updateComputerGameboard(target, attackCoord);
-        if (gameLoop.checkPlayerWin()) {
-          messageDisplay.textContent = 'Player wins';
-          return;
-        }
-        const computerAttackCoord = gameLoop
-          .getComputer()
-          .generateRandomCoord();
-        gameLoop.playRound(computerAttackCoord);
-        updatePlayerGameboard(computerAttackCoord);
-        if (gameLoop.checkComputerWin()) {
-          messageDisplay.textContent = 'Computer wins';
-          return;
-        }
       }
     });
   };
 
-  return { createGrids, populateGameboard, setUpAttackEventListener };
+  return {
+    createGrids,
+    populateGameboard,
+    setUpAttackEventListener,
+    printMessage,
+    updatePlayerGameboard,
+    updateComputerGameboard,
+  };
 })();
 
 export default DOMModule;

@@ -1,16 +1,29 @@
 import gameLoop from './game_loop';
 
-export const createPlayer = (gameboard, name = null) => {
-  return { name, gameboard };
-};
+export const createPlayer = (gameboard, name = 'player') => ({
+  name,
+  gameboard,
+});
 
 export const createComputer = (gameboard, name = 'computer') => {
   const allCoordinates = [];
   let lastHit;
-  let targetQueue = [];
+  let firstHit;
+  const targetQueue = [];
   let direction;
 
-  const shuffleAllCoordinates = (() => {
+  const removeDuplicates = (array) => {
+    array.forEach((coord) => {
+      const index = allCoordinates.findIndex(
+        (item) => item[0] === coord[0] && item[1] === coord[1],
+      );
+      if (index !== -1) {
+        allCoordinates.splice(index, 1);
+      }
+    });
+  };
+
+  (function shuffleAllCoordinates() {
     const gridSize = 10;
     for (let i = 0; i < gridSize; i += 1) {
       for (let j = 0; j < gridSize; j += 1) {
@@ -27,51 +40,107 @@ export const createComputer = (gameboard, name = 'computer') => {
     }
   })();
 
-  const generateRandomCoord = () => {
-    const nextAttack = allCoordinates.pop();
-    return nextAttack;
+  const getAttackCoordinates = () => {
+    const playerGameboard = gameLoop.getPlayerGameboard();
+    removeDuplicates(playerGameboard.getMissedArray());
+    return allCoordinates.pop();
   };
 
-  const getNextDirection = (direction) => {
-    switch (direction) {
+  const getNextDirection = (dir) => {
+    switch (dir) {
       case 'up':
         return 'down';
-        break;
       case 'down':
         return 'left';
-        break;
       case 'left':
         return 'right';
-        break;
+      default:
+        return null;
     }
   };
 
-  const getNextTargetInSameDirection = (lastHit, direction) => {};
+  const getNextTargetInSameDirection = (playerGameboard, target) => {
+    let validAttack = false;
+    let triedAllDirections = false; // Track if all directions have been tried
+
+    while (!validAttack && !triedAllDirections) {
+      let nextTarget = [...target];
+      switch (direction) {
+        case 'up':
+          nextTarget[0] -= 1;
+          break;
+        case 'down':
+          nextTarget[0] += 1;
+          break;
+        case 'left':
+          nextTarget[1] -= 1;
+          break;
+        default:
+          nextTarget[1] += 1;
+          break;
+      }
+
+      if (
+        playerGameboard.isBeyondBoard(nextTarget) ||
+        playerGameboard.isMissed(nextTarget[0], nextTarget[1]) ||
+        playerGameboard.isHit(nextTarget[0], nextTarget[1])
+      ) {
+        direction = getNextDirection(direction);
+
+        if (direction === null) {
+          triedAllDirections = true;
+        }
+
+        if (triedAllDirections) {
+          return null;
+        }
+        nextTarget = target === lastHit ? firstHit : lastHit; // Switch between firstHit and lastHit
+      } else {
+        validAttack = true;
+        return nextTarget;
+      }
+    }
+    return null;
+  };
 
   const computerAttack = () => {
     const playerGameboard = gameLoop.getPlayerGameboard();
+    removeDuplicates(playerGameboard.getMissedArray());
     if (targetQueue.length > 0) {
-      let nextAttack = targetQueue.shift();
-      if (this.gameboard.isHit(nextAttack[0], nextAttack[1])) {
+      removeDuplicates(targetQueue);
+      const nextAttack = targetQueue.shift();
+      playerGameboard.receiveAttack(nextAttack);
+      if (playerGameboard.isHit(nextAttack[0], nextAttack[1])) {
+        if (playerGameboard.getShip(nextAttack[0], nextAttack[1]).sunk) return;
         lastHit = nextAttack;
-        let nextTarget = getNextTargetInSameDirection(lastHit, direction);
+        const nextTarget = getNextTargetInSameDirection(
+          playerGameboard,
+          lastHit,
+        );
         if (nextTarget) targetQueue.unshift(nextTarget);
       } else {
         direction = getNextDirection(direction);
-        let nextTarget = getNextTargetInSameDirection(lastHit, direction);
+        const nextTarget = getNextTargetInSameDirection(
+          playerGameboard,
+          firstHit,
+        );
         if (nextTarget) targetQueue.unshift(nextTarget);
       }
     } else {
-      let nextAttack = allCoordinates.pop();
+      const nextAttack = allCoordinates.pop();
       playerGameboard.receiveAttack(nextAttack);
       if (playerGameboard.isHit(nextAttack[0], nextAttack[1])) {
+        firstHit = [...nextAttack];
         lastHit = nextAttack;
         direction = 'up'; // start with 'up'
-        let nextTarget = getNextTargetInSameDirection(lastHit, direction);
+        const nextTarget = getNextTargetInSameDirection(
+          playerGameboard,
+          lastHit,
+        );
         if (nextTarget) targetQueue.unshift(nextTarget);
       }
     }
   };
 
-  return { name, gameboard, generateRandomCoord };
+  return { name, gameboard, computerAttack, getAttackCoordinates };
 };

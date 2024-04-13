@@ -5,7 +5,6 @@ import gameboard from './gameboard';
 const gameLoop = (() => {
   let player;
   let computer;
-  let playerAttack = true;
 
   const createPlayers = (name) => {
     player = createPlayer(gameboard(), name);
@@ -25,19 +24,26 @@ const gameLoop = (() => {
 
   const getComputer = () => computer;
 
+  const playerWin = () => computer.gameboard.areAllShipsSunk();
+
+  const computerWins = () => player.gameboard.areAllShipsSunk();
+
   function playRound(coord) {
-    if (playerAttack) {
-      computer.gameboard.receiveAttack(coord);
-      playerAttack = false;
-    } else {
-      player.gameboard.receiveAttack(coord);
-      playerAttack = true;
+    computer.gameboard.receiveAttack(coord);
+    DOMModule.updatePlayerGameboard();
+    if (playerWin()) {
+      DOMModule.printMessage(player);
+      return;
+    }
+    DOMModule.updateComputerGameboard();
+    // const attackCoord = computer.getAttackCoordinates();
+    // player.gameboard.receiveAttack(attackCoord);
+    computer.computerAttack();
+    DOMModule.updatePlayerGameboard();
+    if (computerWins()) {
+      DOMModule.printMessage(computer);
     }
   }
-
-  const checkPlayerWin = () => computer.gameboard.areAllShipsSunk();
-
-  const checkComputerWin = () => player.gameboard.areAllShipsSunk();
 
   return {
     createPlayers,
@@ -45,8 +51,6 @@ const gameLoop = (() => {
     getPlayerGameboard,
     getComputerGameboard,
     playRound,
-    checkPlayerWin,
-    checkComputerWin,
     getComputer,
   };
 })();
