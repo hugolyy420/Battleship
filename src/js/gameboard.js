@@ -86,10 +86,6 @@ const gameboard = () => {
       let newCoordinates;
       if (vertical) newCoordinates = [(row += 1), col];
       else newCoordinates = [row, (col += 1)];
-      if (isBeyondBoard(newCoordinates))
-        throw new Error('New coordinates beyond the board');
-      if (isOccupied(newCoordinates)) throw new Error('Coordinates occupied');
-
       coordinatesArray.push(newCoordinates);
     }
 
@@ -97,15 +93,15 @@ const gameboard = () => {
   };
 
   const placeShip = (length, coordinates) => {
-    if (isBeyondBoard(coordinates))
-      throw new Error('Coordinates beyond the board');
-    if (isOccupied(coordinates)) throw new Error('Coordinates occupied');
     const coordinatesArray = generateShipCoordinates(length, coordinates);
-    if (isNextToShips(coordinatesArray))
-      throw new Error(
-        'Please ensure ships are at least 1 unit away from one another',
-      );
-    const shipInstance = createShip(length, coordinatesArray, coordinates);
+    if (
+      isNextToShips(coordinatesArray) ||
+      coordinatesArray.some((coords) => isOccupied(coords)) ||
+      coordinatesArray.some((coords) => isBeyondBoard(coords))
+    )
+      throw new Error('Invalid Coordinates');
+    const coords = [...coordinatesArray];
+    const shipInstance = createShip(length, coordinatesArray, coords[0]);
     shipsArray.push(shipInstance);
   };
 
@@ -144,10 +140,7 @@ const gameboard = () => {
         try {
           placeShip(length, coordinates);
           isValidPlacement = true;
-          console.log(shipsArray);
-        } catch (error) {
-          console.log(error);
-        }
+        } catch (error) {}
       }
     });
   };
@@ -169,6 +162,44 @@ const gameboard = () => {
 
   const getAllSunkShips = () => shipsArray.filter((ship) => ship.sunk);
 
+  const updateShipCoordinates = (
+    initialRow,
+    initialCol,
+    rowOffset,
+    colOffset,
+  ) => {
+    const targetShip = getShip(initialRow, initialCol);
+    if (!targetShip) return;
+    const startCopy = [...targetShip.start];
+    const coordinatesCopy = [...targetShip.coordinates];
+    // let newRow = startCopy[0];
+    // let newCol = startCopy[1];
+    const newRow = startCopy[0] + rowOffset;
+    const newCol = startCopy[1] + colOffset;
+
+    if (targetShip.coordinates[0][0] === targetShip.coordinates[1][0])
+      setHorizontal();
+    else setVertical();
+    const newCoordniatesArray = generateShipCoordinates(targetShip.length, [
+      newRow,
+      newCol,
+    ]);
+    targetShip.start = [];
+    targetShip.coordinates = [];
+    if (
+      newCoordniatesArray.some((coords) => isBeyondBoard(coords)) ||
+      newCoordniatesArray.some((coords) => isOccupied(coords)) ||
+      isNextToShips(newCoordniatesArray)
+    ) {
+      targetShip.start = startCopy;
+      targetShip.coordinates = coordinatesCopy;
+      return;
+    }
+    targetShip.coordinates = newCoordniatesArray;
+    targetShip.start = [newRow, newCol];
+    return targetShip.start;
+  };
+
   return {
     placeShip,
     setVertical,
@@ -187,6 +218,7 @@ const gameboard = () => {
     isBeyondBoard,
     getShip,
     addToMissedArray,
+    updateShipCoordinates,
   };
 };
 

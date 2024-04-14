@@ -46,12 +46,15 @@ header {
   border: 1px solid;
   width: clamp(1rem, 0.2rem + 3vw, 3rem);
   height: clamp(1rem, 0.2rem + 3vw, 3rem);
+  position: relative;
 }
 
-.ship {
-  background-color: #4ca4f7;
+.ship.draggable {
+  background-color: rgba(66, 184, 214, 0.463);
   border: 3px solid #1e48a2;
   margin-left: -1px;
+  position: absolute;
+  z-index: 2;
 }
 
 .hit {
@@ -60,4 +63,12 @@ header {
 
 .missed {
   background-color: #b1b1b1;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.dragging {
+  z-index: 0;
 }
