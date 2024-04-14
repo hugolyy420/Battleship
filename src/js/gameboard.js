@@ -172,13 +172,10 @@ const gameboard = () => {
     if (!targetShip) return;
     const startCopy = [...targetShip.start];
     const coordinatesCopy = [...targetShip.coordinates];
-    // let newRow = startCopy[0];
-    // let newCol = startCopy[1];
     const newRow = startCopy[0] + rowOffset;
     const newCol = startCopy[1] + colOffset;
 
-    if (targetShip.coordinates[0][0] === targetShip.coordinates[1][0])
-      setHorizontal();
+    if (coordinatesCopy[0][0] === targetShip.coordinates[1][0]) setHorizontal();
     else setVertical();
     const newCoordniatesArray = generateShipCoordinates(targetShip.length, [
       newRow,
@@ -200,6 +197,29 @@ const gameboard = () => {
     return targetShip.start;
   };
 
+  const rotateShip = (row, col) => {
+    const targetShip = getShip(row, col);
+    const coordinatesCopy = [...targetShip.coordinates];
+    if (targetShip.coordinates[0][0] === targetShip.coordinates[1][0])
+      setVertical();
+    else setHorizontal();
+    const newCoordniatesArray = generateShipCoordinates(targetShip.length, [
+      row,
+      col,
+    ]);
+    targetShip.coordinates = [];
+    if (
+      newCoordniatesArray.some((coords) => isBeyondBoard(coords)) ||
+      newCoordniatesArray.some((coords) => isOccupied(coords)) ||
+      isNextToShips(newCoordniatesArray)
+    ) {
+      targetShip.coordinates = coordinatesCopy;
+      return;
+    }
+    targetShip.coordinates = newCoordniatesArray;
+    return newCoordniatesArray;
+  };
+
   return {
     placeShip,
     setVertical,
@@ -219,6 +239,7 @@ const gameboard = () => {
     getShip,
     addToMissedArray,
     updateShipCoordinates,
+    rotateShip,
   };
 };
 

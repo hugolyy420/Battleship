@@ -34,6 +34,14 @@ const DOMModule = (() => {
     });
   };
 
+  const clearGameBoard = () => {
+    const draggables = document.querySelectorAll('.draggable');
+    draggables.forEach((draggable) => {
+      const targetBoardCells = draggable.closest('.board-cell');
+      targetBoardCells.textContent = '';
+    });
+  };
+
   const renderShips = () => {
     const shipsArray = gameLoop.getPlayerGameboard().getShipsArray();
     shipsArray.forEach((ship) => {
@@ -222,6 +230,48 @@ const DOMModule = (() => {
     });
   };
 
+  const setupRotateShipEventListener = () => {
+    const draggables = document.querySelectorAll('.draggable');
+    draggables.forEach((draggable) => {
+      draggable.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const playerGameboard = gameLoop.getPlayerGameboard();
+        const targetCell = event.target.closest('.board-cell');
+        const targetRow = parseInt(targetCell.dataset.row, 10);
+        const targetCol = parseInt(targetCell.dataset.col, 10);
+        const newCoordinatesArray = playerGameboard.rotateShip(
+          targetRow,
+          targetCol,
+        );
+        if (!newCoordinatesArray) {
+          event.target.classList.add('shake');
+          return;
+        }
+        targetCell.textContent = '';
+        clearGameBoard();
+        renderShips();
+        setUpAllEventListeners();
+      });
+    });
+  };
+
+  const setupShakeEndEventListener = () => {
+    const draggables = document.querySelectorAll('.draggable');
+    draggables.forEach((draggable) => {
+      draggable.addEventListener('animationend', (event) => {
+        draggable.classList.remove('shake');
+      });
+    });
+  };
+
+  function setUpAllEventListeners() {
+    setUpAttackEventListener();
+    setUpShipsDraggableEventListener();
+    setUpBoardCellsDragOverEventListener();
+    setupRotateShipEventListener();
+    setupShakeEndEventListener();
+  }
+
   return {
     createGrids,
     populateGameboard,
@@ -229,8 +279,7 @@ const DOMModule = (() => {
     printMessage,
     updatePlayerGameboard,
     updateComputerGameboard,
-    setUpShipsDraggableEventListener,
-    setUpBoardCellsDragOverEventListener,
+    setUpAllEventListeners,
   };
 })();
 
@@ -239,6 +288,4 @@ export default DOMModule;
 DOMModule.createGrids();
 gameLoop.createPlayers();
 DOMModule.populateGameboard();
-DOMModule.setUpAttackEventListener();
-DOMModule.setUpShipsDraggableEventListener();
-DOMModule.setUpBoardCellsDragOverEventListener();
+DOMModule.setUpAllEventListeners();
