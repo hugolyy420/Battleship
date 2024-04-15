@@ -1,5 +1,6 @@
 import DOMModule from './DOM';
-import { createComputer, createPlayer } from './player';
+import createComputer from './computer';
+import createPlayer from './player';
 import gameboard from './gameboard';
 
 const gameLoop = (() => {
@@ -33,11 +34,13 @@ const gameLoop = (() => {
   const resetComputer = () => computer.resetComputer();
 
   const checkWin = () => {
-    if (playerWin()) DOMModule.printMessage(player);
-    else if (computerWins()) DOMModule.printMessage(computer);
+    if (playerWin()) DOMModule.printMessage(getPlayer());
+    else if (computerWins()) DOMModule.printMessage(getComputer());
+
     if (playerWin() || computerWins()) {
       DOMModule.toggleGameboardEventListenerStatus();
       DOMModule.toggleButtonSectionDisplay();
+
       return true;
     }
   };
@@ -50,6 +53,7 @@ const gameLoop = (() => {
 
     computer.computerAttack();
     DOMModule.updatePlayerGameboard();
+
     if (checkWin()) return;
   }
 

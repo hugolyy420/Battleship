@@ -1,9 +1,20 @@
 :root {
   --system-ui: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --hit: #ff2b2b;
+  --hit: #ff0808;
   --missed: #b1b1b1;
-  --inactive: #bcbcbc;
+  --gap: clamp(0.7rem, 0.3rem + 5vw, 3rem);
+  --regular-font-size: clamp(0.4rem, 0.5rem + 1vw, 1.1rem);
+  --larger-font-size: clamp(0.6rem, 0.5rem + 2vw, 1.5rem);
+  --primary-color: #fff;
+  --secondary-color: #d4d4d4;
+  --accent-color: linear-gradient(
+    90deg,
+    rgb(38, 115, 175) 0%,
+    rgb(215, 74, 133) 59%,
+    rgb(247, 102, 153) 99%
+  );
+  --button-padding: clamp(0.3rem, 0.1rem + 2vw, 1rem);
 }
 
 .element {
@@ -21,24 +32,81 @@ body {
 }
 
 header {
-  padding: 1rem clamp(3rem, -0.25rem + 5vw, 5rem);
+  padding: 1rem clamp(1rem, -0.25rem + 5vw, 2rem);
   display: flex;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
+  font-size: var(--larger-font-size);
+  --gap: clamp(0.2rem, 0.2rem + 2vw, 1rem);
+  gap: var(--gap);
+  color: var(--accent-color);
+}
+
+.icon {
+  width: clamp(2rem, 2rem + 5vw, 4rem);
+  color: var(--accent-color);
+}
+
+.icon-font {
+  font-weight: 700;
+  background: #6d8bee;
+  background: -webkit-linear-gradient(#c34166, #2c90ca);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .main-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(1rem, 0.5rem + 5vw, 5rem);
+  gap: var(--gap);
+}
+
+.message-display {
+  font-size: var(--regular-font-size);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.intro-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  margin: clamp(0.5rem, 0.2rem + 3vw, 2rem);
+  font-size: var(--regular-font-size);
+  font-weight: 700;
+}
+
+.name-input {
+  border: transparent;
+  background-color: #e8e8e8;
+  border-radius: 5px;
+  font-size: var(--regular-font-size);
+  padding: clamp(0.2rem, 0.5rem + 1vw, 1rem);
+  font-weight: 700;
+}
+
+.name-input:focus {
+  outline: none;
+}
+
+.player,
+.computer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
 }
 
 .game-section {
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: clamp(1rem, 0.3rem + 5vw, 5rem);
+  gap: var(--gap);
+  font-size: var(--larger-font-size);
+  font-weight: 700;
 }
 
 .gameboard-container {
@@ -52,20 +120,41 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(1rem, 0.5rem + 5vw, 5rem);
+  gap: var(--gap);
   margin: clamp(1rem, 0.2rem + 3vw, 3rem);
 }
 
 .board-cell {
-  border: 1px solid;
-  width: clamp(1rem, 0.2rem + 3vw, 3rem);
-  height: clamp(1rem, 0.2rem + 3vw, 3rem);
+  border: 1px solid var(--primary-color);
+  background-color: var(--secondary-color);
+  width: clamp(0.8rem, 0.2rem + 2.2vw, 2.5rem);
+  height: clamp(0.8rem, 0.2rem + 2.2vw, 2.5rem);
   position: relative;
+  border-radius: 5px;
+}
+
+.board-cell:hover {
+  background-color: #fff;
+}
+
+button {
+  background: var(--accent-color);
+  padding: var(--button-padding);
+  border: none;
+  border-radius: 10px;
+  color: var(--primary-color);
+  font-size: var(--regular-font-size);
+  font-weight: 700;
+}
+
+button:hover {
+  opacity: 0.9;
+  cursor: pointer;
 }
 
 .ship.draggable {
-  background-color: rgba(66, 184, 214, 0.463);
-  border: 3px solid #1e48a2;
+  background: var(--accent-color);
+  border-radius: 5px;
   margin-left: -1px;
   position: absolute;
   z-index: 2;
@@ -81,6 +170,10 @@ header {
 
 .draggable {
   cursor: move;
+}
+
+.draggable:hover {
+  opacity: 0.8;
 }
 
 .dragging {
@@ -120,5 +213,8 @@ header {
 }
 
 .inactive {
-  opacity: 0.5;
+  opacity: 0.8;
+  .draggable {
+    opacity: 0.6;
+  }
 }

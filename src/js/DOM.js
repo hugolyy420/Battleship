@@ -31,6 +31,10 @@ const DOMModule = (() => {
     });
   };
 
+  const clearDisplayMessage = () => {
+    messageDisplay.textContent = '';
+  };
+
   const resetGameBoard = () => {
     gameboardContainers.forEach((container) => {
       container.textContent = '';
@@ -41,7 +45,7 @@ const DOMModule = (() => {
     const shipsArray = gameLoop.getPlayerGameboard().getShipsArray();
     shipsArray.forEach((ship) => {
       const shipInstance = document.createElement('div');
-      const size = 'clamp(1rem, 0.2rem + 3vw, 3rem)';
+      const size = 'clamp(0.8rem, 0.2rem + 2.2vw, 2.5rem)';
       if (ship.coordinates[0][0] === ship.coordinates[1][0]) {
         shipInstance.style.width = `calc(${ship.length} * ${size})`;
         shipInstance.style.height = size;
@@ -84,7 +88,6 @@ const DOMModule = (() => {
   };
 
   const toggleButtonSectionDisplay = () => {
-    const buttonSection = document.querySelector('.button-section');
     const randomButton = document.querySelector('.random-button');
     const startGameButton = document.querySelector('.start-button');
     const restartButton = document.querySelector('.restart-button');
@@ -95,12 +98,8 @@ const DOMModule = (() => {
     }
 
     if (!placeMode && !gameOver) {
-      buttonSection.classList.add('hide');
       randomButton.classList.add('hide');
       startGameButton.classList.add('hide');
-    }
-    if (gameOver) {
-      buttonSection.classList.remove('hide');
       restartButton.classList.remove('hide');
     }
   };
@@ -109,7 +108,6 @@ const DOMModule = (() => {
     const computerGameboard = gameLoop.getComputerGameboard();
     const hitArray = computerGameboard.getHitArray();
     const missArray = computerGameboard.getMissedArray();
-    console.log(missArray);
     hitArray.forEach((coord) => {
       const targetCell = document.querySelector(
         `.computer-gameboard > [data-row='${coord[0]}'][data-col='${coord[1]}']`,
@@ -143,8 +141,24 @@ const DOMModule = (() => {
   };
 
   const printMessage = (player) => {
-    if (player.name === 'player') messageDisplay.textContent = 'Player wins';
-    else messageDisplay.textContent = 'Computer wins';
+    if (placeMode) {
+      const messageOne =
+        'Rearrange the position of the ships by dragging and dropping.';
+      const messageTwo = 'Click the ship to rotate it.';
+      const messageThree =
+        'Ships must be at least one grid away from each other.';
+      const messageArray = [messageOne, messageTwo, messageThree];
+      messageArray.forEach((message) => {
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        messageDisplay.append(messageElement);
+      });
+      return;
+    }
+    if (player.name !== 'Computer')
+      messageDisplay.textContent = `${player.name} wins.`;
+    else if (player.name === 'Computer')
+      messageDisplay.textContent = 'Computer wins.';
     gameOver = true;
   };
 
@@ -269,7 +283,9 @@ const DOMModule = (() => {
             `.player-gameboard > [data-row='${newStart[0]}'][data-col='${newStart[1]}']`,
           );
 
-          realTarget.appendChild(draggable);
+          if (realTarget !== draggable.parentNode) {
+            realTarget.appendChild(draggable);
+          }
         }
       }
     });
@@ -335,6 +351,7 @@ const DOMModule = (() => {
     const startButton = document.querySelector('.start-button');
     startButton.addEventListener('click', () => {
       placeMode = false;
+      clearDisplayMessage();
       toggleGameboardEventListenerStatus();
       toggleButtonSectionDisplay();
     });
@@ -347,6 +364,7 @@ const DOMModule = (() => {
       gameOver = false;
       toggleButtonSectionDisplay();
       resetGameBoard();
+      clearDisplayMessage();
       setUpGame();
     });
   };
@@ -366,6 +384,7 @@ const DOMModule = (() => {
     createGrids();
     gameLoop.resetComputer();
     printNames();
+    printMessage();
     populateGameboard();
     setUpAllEventListeners();
     toggleGameboardEventListenerStatus();
