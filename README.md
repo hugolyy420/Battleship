@@ -7,6 +7,5 @@ A Battleship game created with HTML, CSS and Javascript. <br>
 - Click the random button to let the app decide for you!
 # Outcomes
 - Using ES6 modules and factory patterns for code organization
-- Combination of CSS Flexbox and Grid
 - Usage of Jest to perform unit testing on objects' public interface
 
