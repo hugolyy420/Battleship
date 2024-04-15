@@ -1,6 +1,9 @@
 :root {
   --system-ui: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --hit: #ff2b2b;
+  --missed: #b1b1b1;
+  --inactive: #bcbcbc;
 }
 
 .element {
@@ -24,8 +27,11 @@ header {
   align-items: center;
 }
 
-.test {
-  color: red;
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 0.5rem + 5vw, 5rem);
 }
 
 .game-section {
@@ -40,6 +46,14 @@ header {
   max-width: 640px;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
+}
+
+.button-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1rem, 0.5rem + 5vw, 5rem);
+  margin: clamp(1rem, 0.2rem + 3vw, 3rem);
 }
 
 .board-cell {
@@ -58,11 +72,11 @@ header {
 }
 
 .hit {
-  background-color: #ff2b2b;
+  background-color: var(--hit);
 }
 
 .missed {
-  background-color: #b1b1b1;
+  background-color: var(--missed);
 }
 
 .draggable {
@@ -99,4 +113,12 @@ header {
 .draggable.shake {
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   background-color: rgba(250, 49, 49, 0.463);
+}
+
+.hide {
+  display: none;
+}
+
+.inactive {
+  opacity: 0.5;
 }

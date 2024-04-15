@@ -24,25 +24,33 @@ const gameLoop = (() => {
 
   const getComputer = () => computer;
 
+  const getPlayer = () => player;
+
   const playerWin = () => computer.gameboard.areAllShipsSunk();
 
   const computerWins = () => player.gameboard.areAllShipsSunk();
 
+  const resetComputer = () => computer.resetComputer();
+
+  const checkWin = () => {
+    if (playerWin()) DOMModule.printMessage(player);
+    else if (computerWins()) DOMModule.printMessage(computer);
+    if (playerWin() || computerWins()) {
+      DOMModule.toggleGameboardEventListenerStatus();
+      DOMModule.toggleButtonSectionDisplay();
+      return true;
+    }
+  };
+
   function playRound(coord) {
     computer.gameboard.receiveAttack(coord);
-    DOMModule.updatePlayerGameboard();
-    if (playerWin()) {
-      DOMModule.printMessage(player);
-      return;
-    }
     DOMModule.updateComputerGameboard();
-    // const attackCoord = computer.getAttackCoordinates();
-    // player.gameboard.receiveAttack(attackCoord);
+
+    if (checkWin()) return;
+
     computer.computerAttack();
     DOMModule.updatePlayerGameboard();
-    if (computerWins()) {
-      DOMModule.printMessage(computer);
-    }
+    if (checkWin()) return;
   }
 
   return {
@@ -52,6 +60,8 @@ const gameLoop = (() => {
     getComputerGameboard,
     playRound,
     getComputer,
+    getPlayer,
+    resetComputer,
   };
 })();
 

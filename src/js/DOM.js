@@ -1,4 +1,3 @@
-import '../style.css';
 import gameLoop from './game_loop';
 
 const DOMModule = (() => {
@@ -6,6 +5,8 @@ const DOMModule = (() => {
   const messageDisplay = document.querySelector('.message-display');
   let initialRow;
   let initialCol;
+  let placeMode = true;
+  let gameOver = false;
 
   const createGrids = () => {
     const gridSize = 10;
@@ -22,23 +23,17 @@ const DOMModule = (() => {
     });
   };
 
-  const renderRealShips = () => {
-    const shipsArray = gameLoop.getPlayerGameboard().getShipsArray();
-    shipsArray.forEach((ships) => {
-      ships.coordinates.forEach((coord) => {
-        const boardCell = document.querySelector(
-          `[data-row='${coord[0]}'][data-col='${coord[1]}']`,
-        );
-        boardCell.classList.add('ship');
-      });
-    });
-  };
-
   const clearGameBoard = () => {
     const draggables = document.querySelectorAll('.draggable');
     draggables.forEach((draggable) => {
       const targetBoardCells = draggable.closest('.board-cell');
       targetBoardCells.textContent = '';
+    });
+  };
+
+  const resetGameBoard = () => {
+    gameboardContainers.forEach((container) => {
+      container.textContent = '';
     });
   };
 
@@ -67,6 +62,47 @@ const DOMModule = (() => {
   const populateGameboard = () => {
     gameLoop.autoPlaceShips();
     renderShips();
+  };
+
+  const toggleGameboardEventListenerStatus = () => {
+    const computerGameboard = document.querySelector('.computer-gameboard');
+    const playerGameboard = document.querySelector('.player-gameboard');
+    if (placeMode && !gameOver) {
+      computerGameboard.style.pointerEvents = 'none';
+      computerGameboard.classList.add('inactive');
+      playerGameboard.style.pointerEvents = 'auto';
+      playerGameboard.classList.remove('inactive');
+    } else if (!placeMode && !gameOver) {
+      computerGameboard.style.pointerEvents = 'auto';
+      computerGameboard.classList.remove('inactive');
+      playerGameboard.style.pointerEvents = 'none';
+      playerGameboard.classList.add('inactive');
+    } else if (gameOver) {
+      computerGameboard.style.pointerEvents = 'none';
+      computerGameboard.classList.add('inactive');
+    }
+  };
+
+  const toggleButtonSectionDisplay = () => {
+    const buttonSection = document.querySelector('.button-section');
+    const randomButton = document.querySelector('.random-button');
+    const startGameButton = document.querySelector('.start-button');
+    const restartButton = document.querySelector('.restart-button');
+    if (placeMode) {
+      randomButton.classList.remove('hide');
+      startGameButton.classList.remove('hide');
+      restartButton.classList.add('hide');
+    }
+
+    if (!placeMode && !gameOver) {
+      buttonSection.classList.add('hide');
+      randomButton.classList.add('hide');
+      startGameButton.classList.add('hide');
+    }
+    if (gameOver) {
+      buttonSection.classList.remove('hide');
+      restartButton.classList.remove('hide');
+    }
   };
 
   const updateComputerGameboard = () => {
@@ -109,6 +145,16 @@ const DOMModule = (() => {
   const printMessage = (player) => {
     if (player.name === 'player') messageDisplay.textContent = 'Player wins';
     else messageDisplay.textContent = 'Computer wins';
+    gameOver = true;
+  };
+
+  const printNames = () => {
+    const player = gameLoop.getPlayer();
+    const computer = gameLoop.getComputer();
+    const playerName = document.querySelector('.player-name');
+    const computerName = document.querySelector('.computer-name');
+    playerName.textContent = player.name;
+    computerName.textContent = computer.name;
   };
 
   const setUpAttackEventListener = () => {
@@ -161,8 +207,6 @@ const DOMModule = (() => {
           `[data-row='${clickedRow}'][data-col='${clickedCol}']`,
         );
 
-        console.log(clickedRow, clickedCol);
-
         if (initialCell) {
           initialRow = clickedRow;
           initialCol = clickedCol;
@@ -182,6 +226,7 @@ const DOMModule = (() => {
 
   const setUpBoardCellsDragOverEventListener = () => {
     const container = document.querySelector('.player-gameboard');
+
     container.addEventListener('dragover', (event) => {
       event.preventDefault();
     });
@@ -230,7 +275,16 @@ const DOMModule = (() => {
     });
   };
 
-  const setupRotateShipEventListener = () => {
+  const setUpShakeEndEventListener = () => {
+    const draggables = document.querySelectorAll('.draggable');
+    draggables.forEach((draggable) => {
+      draggable.addEventListener('animationend', () => {
+        draggable.classList.remove('shake');
+      });
+    });
+  };
+
+  const setUpRotateShipEventListener = () => {
     const draggables = document.querySelectorAll('.draggable');
     draggables.forEach((draggable) => {
       draggable.addEventListener('click', (event) => {
@@ -250,17 +304,50 @@ const DOMModule = (() => {
         targetCell.textContent = '';
         clearGameBoard();
         renderShips();
-        setUpAllEventListeners();
+        setUpShipsDraggableEventListener();
+        setUpRotateShipEventListener();
+        setUpShakeEndEventListener();
       });
     });
   };
 
-  const setupShakeEndEventListener = () => {
-    const draggables = document.querySelectorAll('.draggable');
-    draggables.forEach((draggable) => {
-      draggable.addEventListener('animationend', (event) => {
-        draggable.classList.remove('shake');
-      });
+  const showGameContent = () => {
+    const gameContent = document.querySelector('.game-section');
+    const introContent = document.querySelector('.intro-content');
+    const buttonSection = document.querySelector('.button-section');
+    buttonSection.classList.remove('hide');
+    gameContent.classList.remove('hide');
+    introContent.classList.add('hide');
+  };
+
+  const setupRandomizeShipsEventListener = () => {
+    const randomButton = document.querySelector('.random-button');
+    randomButton.addEventListener('click', () => {
+      clearGameBoard();
+      populateGameboard();
+      setUpShipsDraggableEventListener();
+      setUpRotateShipEventListener();
+      setUpShakeEndEventListener();
+    });
+  };
+
+  const setupStartGameEventListener = () => {
+    const startButton = document.querySelector('.start-button');
+    startButton.addEventListener('click', () => {
+      placeMode = false;
+      toggleGameboardEventListenerStatus();
+      toggleButtonSectionDisplay();
+    });
+  };
+
+  const setupRestartGameEventListener = () => {
+    const restartButton = document.querySelector('.restart-button');
+    restartButton.addEventListener('click', () => {
+      placeMode = true;
+      gameOver = false;
+      toggleButtonSectionDisplay();
+      resetGameBoard();
+      setUpGame();
     });
   };
 
@@ -268,24 +355,43 @@ const DOMModule = (() => {
     setUpAttackEventListener();
     setUpShipsDraggableEventListener();
     setUpBoardCellsDragOverEventListener();
-    setupRotateShipEventListener();
-    setupShakeEndEventListener();
+    setUpRotateShipEventListener();
+    setUpShakeEndEventListener();
+    setupRandomizeShipsEventListener();
+    setupStartGameEventListener();
+    setupRestartGameEventListener();
   }
 
+  function setUpGame() {
+    createGrids();
+    gameLoop.resetComputer();
+    printNames();
+    populateGameboard();
+    setUpAllEventListeners();
+    toggleGameboardEventListenerStatus();
+  }
+
+  const setUpNameSubmitEventListener = () => {
+    const submitButton = document.querySelector('.submit-button');
+    const input = document.querySelector('.name-input');
+    submitButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      const name = input.value;
+      if (name === '') gameLoop.createPlayers();
+      else gameLoop.createPlayers(name);
+      setUpGame();
+      showGameContent();
+    });
+  };
+
   return {
-    createGrids,
-    populateGameboard,
-    setUpAttackEventListener,
     printMessage,
     updatePlayerGameboard,
     updateComputerGameboard,
-    setUpAllEventListeners,
+    setUpNameSubmitEventListener,
+    toggleGameboardEventListenerStatus,
+    toggleButtonSectionDisplay,
   };
 })();
 
 export default DOMModule;
-
-DOMModule.createGrids();
-gameLoop.createPlayers();
-DOMModule.populateGameboard();
-DOMModule.setUpAllEventListeners();

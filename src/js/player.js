@@ -6,10 +6,10 @@ export const createPlayer = (gameboard, name = 'player') => ({
 });
 
 export const createComputer = (gameboard, name = 'computer') => {
-  const allCoordinates = [];
+  let allCoordinates = [];
   let lastHit;
   let firstHit;
-  const targetQueue = [];
+  let targetQueue = [];
   let direction;
 
   const removeDuplicates = (array) => {
@@ -23,7 +23,9 @@ export const createComputer = (gameboard, name = 'computer') => {
     });
   };
 
-  (function shuffleAllCoordinates() {
+  function resetComputer() {
+    allCoordinates = [];
+    targetQueue = [];
     const gridSize = 10;
     for (let i = 0; i < gridSize; i += 1) {
       for (let j = 0; j < gridSize; j += 1) {
@@ -38,13 +40,13 @@ export const createComputer = (gameboard, name = 'computer') => {
         allCoordinates[i],
       ];
     }
-  })();
+  }
 
-  const getAttackCoordinates = () => {
-    const playerGameboard = gameLoop.getPlayerGameboard();
-    removeDuplicates(playerGameboard.getMissedArray());
-    return allCoordinates.pop();
-  };
+  // const getAttackCoordinates = () => {
+  //   const playerGameboard = gameLoop.getPlayerGameboard();
+  //   removeDuplicates(playerGameboard.getMissedArray());
+  //   return allCoordinates.pop();
+  // };
 
   const getNextDirection = (dir) => {
     switch (dir) {
@@ -142,5 +144,5 @@ export const createComputer = (gameboard, name = 'computer') => {
     }
   };
 
-  return { name, gameboard, computerAttack, getAttackCoordinates };
+  return { name, gameboard, computerAttack, resetComputer };
 };

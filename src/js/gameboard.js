@@ -1,9 +1,9 @@
 import createShip from './ship';
 
 const gameboard = () => {
-  const shipsArray = [];
-  const missedArray = [];
-  const hitArray = [];
+  let shipsArray = [];
+  let missedArray = [];
+  let hitArray = [];
   let vertical = false;
 
   const setVertical = () => (vertical = true);
@@ -121,6 +121,9 @@ const gameboard = () => {
   };
 
   const autoPlaceShips = () => {
+    shipsArray = [];
+    missedArray = [];
+    hitArray = [];
     const shipLengths = [5, 4, 3, 3, 2];
 
     shipLengths.forEach((length) => {
